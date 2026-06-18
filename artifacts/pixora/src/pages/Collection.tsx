@@ -1,290 +1,132 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { Shield, BookOpen, Eye, Award, Zap, Sparkles } from "lucide-react";
-import { BottomNav } from "@/components/BottomNav";
-import { useGame } from "@/store/gameStore";
+import { motion } from "framer-motion";
 import { WORLDS } from "@/data/challenges";
-import { cn } from "@/lib/utils";
-
-const BADGES = [
-  { id: "Explorer", name: "Explorer", icon: Eye, color: "text-sky-300", bg: "from-sky-500 to-cyan-600", glow: "rgba(14,165,233,0.5)" },
-  { id: "Detective", name: "Detail Detective", icon: Sparkles, color: "text-violet-300", bg: "from-violet-500 to-purple-600", glow: "rgba(139,92,246,0.5)" },
-  { id: "Truth Seeker", name: "Truth Seeker", icon: Shield, color: "text-emerald-300", bg: "from-emerald-500 to-teal-600", glow: "rgba(16,185,129,0.5)" },
-  { id: "Scholar", name: "Scholar", icon: BookOpen, color: "text-amber-300", bg: "from-amber-500 to-orange-600", glow: "rgba(245,158,11,0.5)" },
-  { id: "Guardian", name: "Guardian", icon: Award, color: "text-rose-300", bg: "from-rose-500 to-pink-600", glow: "rgba(244,63,94,0.5)" },
-  { id: "Master", name: "Master", icon: Zap, color: "text-yellow-300", bg: "from-yellow-500 to-amber-600", glow: "rgba(234,179,8,0.5)" },
-];
-
-const CRYSTAL_COLORS = [
-  { from: "from-emerald-400", to: "to-teal-500", glow: "rgba(16,185,129,0.7)", sparkle: "#10B981" },
-  { from: "from-blue-400", to: "to-indigo-500", glow: "rgba(99,102,241,0.7)", sparkle: "#6366F1" },
-  { from: "from-purple-400", to: "to-violet-500", glow: "rgba(139,92,246,0.7)", sparkle: "#8B5CF6" },
-  { from: "from-orange-400", to: "to-rose-500", glow: "rgba(249,115,22,0.7)", sparkle: "#F97316" },
-];
-
-const STAR_DATA = Array.from({ length: 25 }, (_, i) => ({
-  x: Math.random() * 100, y: Math.random() * 100,
-  size: Math.random() * 2 + 1, delay: Math.random() * 4, duration: Math.random() * 3 + 2,
-}));
+import { useGame } from "@/store/gameStore";
+import { HUD } from "@/components/HUD";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function Collection() {
   const [, setLocation] = useLocation();
   const { state } = useGame();
-  const [tab, setTab] = useState<"crystals" | "badges">("crystals");
-  const [hoveredCrystal, setHoveredCrystal] = useState<number | null>(null);
+  const totalXP = state.totalXP;
+  const crystals = Object.values(state.worldProgress).filter(w => w.crystalEarned).length;
 
-  const crystalsEarnedCount = Object.values(state.worldProgress).filter(w => w.crystalEarned).length;
-  const completionPercentage = Math.round((crystalsEarnedCount / 4) * 100);
+  const level = Math.max(1, Math.ceil(totalXP / 100));
+  const nextLevelXP = level * 100;
+  const progress = Math.min(100, (totalXP % 100) / 100 * 100);
+
+  const RANKS = [
+    { min:0, max:99,   label:"PIXEL CADET",  icon:"◦" },
+    { min:100, max:199, label:"CIRCUIT SCOUT", icon:"◈" },
+    { min:200, max:299, label:"AI EXPLORER",   icon:"◆" },
+    { min:300, max:999, label:"PIXORA CHAMPION",icon:"★" },
+  ];
+  const rank = RANKS.find(r => totalXP >= r.min && totalXP <= r.max) ?? RANKS[RANKS.length-1];
 
   return (
-    <div className="min-h-screen pb-28 relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e1b4b 40%, #0f2027 100%)" }}>
+    <div className="min-h-screen pb-28 pt-20 relative" style={{ background:"var(--px-bg)" }}>
+      <div className="absolute inset-0 pointer-events-none opacity-4"
+        style={{ backgroundImage:"linear-gradient(var(--px-bg2) 1px,transparent 1px),linear-gradient(90deg,var(--px-bg2) 1px,transparent 1px)", backgroundSize:"24px 24px" }} />
+      <HUD />
 
-      {/* Starfield */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {STAR_DATA.map((s, i) => (
-          <motion.div key={i} className="absolute rounded-full bg-white"
-            style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.size, height: s.size }}
-            animate={{ opacity: [0.1, 0.7, 0.1] }}
-            transition={{ duration: s.duration, delay: s.delay, repeat: Infinity }}
-          />
-        ))}
-        <div className="absolute top-1/4 right-0 w-64 h-64 rounded-full opacity-10 blur-3xl"
-          style={{ background: "radial-gradient(circle, #6A5CFF, transparent)" }} />
-      </div>
+      <div className="max-w-md mx-auto px-4 pt-4 relative z-10">
 
-      <div className="max-w-md mx-auto px-4 pt-12 relative z-10">
-
-        {/* Back button */}
-        <motion.button
-          onClick={() => setLocation("/map")}
-          className="flex items-center gap-1.5 mb-6 text-white/50 hover:text-white/80 font-bold text-sm transition-colors"
-          whileTap={{ scale: 0.94 }}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <span className="text-lg">←</span>
-          <span>Back to Map</span>
-        </motion.button>
+        {/* Back */}
+        <button onClick={() => setLocation("/map")}
+          style={{ fontFamily:"'Press Start 2P'", fontSize:8, color:"var(--px-green3)", background:"none", border:"none", cursor:"pointer", letterSpacing:1, marginBottom:16 }}>
+          ◀ MAP
+        </button>
 
         {/* Header */}
-        <motion.div className="text-center mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="text-5xl mb-2">💎</div>
-          <h1 className="text-3xl font-black text-white mb-1"
-            style={{ textShadow: "0 0 20px rgba(255,255,255,0.3)" }}>My Collection</h1>
+        <div className="text-center mb-6">
+          <div className="px-label mb-1" style={{ letterSpacing:3, color:"var(--px-gray)" }}>EXPLORER FILE</div>
+          <h1 className="px-title" style={{ fontSize:12, color:"var(--px-green)" }}>COLLECTION</h1>
+        </div>
 
-          {/* Circular progress */}
-          <div className="flex items-center justify-center mt-6">
-            <div className="relative w-36 h-36 flex items-center justify-center">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
-                <motion.circle
-                  cx="50" cy="50" r="40" fill="none"
-                  stroke="url(#progressGrad)" strokeWidth="8"
-                  strokeDasharray={`${completionPercentage * 2.51} 251`}
-                  strokeLinecap="round"
-                  initial={{ strokeDasharray: "0 251" }}
-                  animate={{ strokeDasharray: `${completionPercentage * 2.51} 251` }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
-                />
-                <defs>
-                  <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#FF7A59" />
-                    <stop offset="50%" stopColor="#FFB84D" />
-                    <stop offset="100%" stopColor="#6A5CFF" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              {/* Glow ring */}
-              <div className="absolute inset-2 rounded-full opacity-20 blur-md"
-                style={{ background: "conic-gradient(from 0deg, #FF7A59, #FFB84D, #6A5CFF, transparent)" }} />
-              <div className="absolute flex flex-col items-center">
-                <motion.span
-                  className="text-3xl font-black text-white"
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                >
-                  {completionPercentage}%
-                </motion.span>
-                <span className="text-[10px] text-white/50 font-black tracking-widest uppercase">Restored</span>
-              </div>
-            </div>
+        {/* Rank card */}
+        <motion.div className="px-box-glow p-4 mb-5 text-center"
+          initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}>
+          <div style={{ fontSize:36, marginBottom:4 }}>{rank.icon}</div>
+          <div style={{ fontFamily:"'Press Start 2P'", fontSize:10, color:"var(--px-white)", marginBottom:4 }}>{rank.label}</div>
+          <div style={{ fontFamily:"'Press Start 2P'", fontSize:8, color:"var(--px-green)" }}>
+            LVL {level} · {totalXP} XP
           </div>
-
-          {crystalsEarnedCount === 4 && (
+          {/* XP bar */}
+          <div className="mt-3" style={{ background:"var(--px-bg3)", border:"2px solid var(--px-green3)", height:12 }}>
             <motion.div
-              className="mt-4 px-4 py-2 rounded-full text-sm font-black text-yellow-300 inline-block"
-              style={{ background: "rgba(255,200,0,0.15)", border: "1px solid rgba(255,200,0,0.3)", boxShadow: "0 0 20px rgba(255,200,0,0.2)" }}
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              🏆 PIXORA Champion!
-            </motion.div>
-          )}
+              style={{ height:"100%", background:"var(--px-green)" }}
+              initial={{ width:0 }} animate={{ width:`${progress}%` }}
+              transition={{ duration:1, ease:"easeOut" }} />
+          </div>
+          <div style={{ fontFamily:"'Press Start 2P'", fontSize:7, color:"var(--px-gray)", marginTop:4 }}>
+            {totalXP}/{nextLevelXP} XP TO NEXT LEVEL
+          </div>
         </motion.div>
 
-        {/* Tabs */}
-        <div className="flex p-1.5 rounded-2xl mb-8"
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          {(["crystals", "badges"] as const).map(t => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={cn("flex-1 py-3 text-sm font-black rounded-xl transition-all relative overflow-hidden", tab === t ? "text-white" : "text-white/30")}
-            >
-              {tab === t && (
-                <motion.div
-                  layoutId="tab-bg"
-                  className="absolute inset-0 rounded-xl"
-                  style={{ background: "linear-gradient(135deg, rgba(255,122,89,0.3), rgba(106,92,255,0.3))", border: "1px solid rgba(255,255,255,0.15)" }}
-                />
-              )}
-              <span className="relative z-10">
-                {t === "crystals" ? `💎 Crystals (${crystalsEarnedCount}/4)` : `🏅 Badges (${BADGES.length})`}
-              </span>
-            </button>
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-2 mb-5">
+          {[
+            { icon:"⚡", val:totalXP, label:"TOTAL XP" },
+            { icon:"◆", val:`${crystals}/4`, label:"CRYSTALS" },
+            { icon:"✓", val:state.totalCorrectAnswers, label:"CORRECT" },
+          ].map((stat,i) => (
+            <motion.div key={i} className="px-box p-3 text-center"
+              initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:i*0.1 }}>
+              <div style={{ fontSize:20 }}>{stat.icon}</div>
+              <div style={{ fontFamily:"'Press Start 2P'", fontSize:10, color:"var(--px-white)", marginTop:2 }}>{stat.val}</div>
+              <div className="px-label mt-1" style={{ fontSize:6, color:"var(--px-gray)" }}>{stat.label}</div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Crystals grid */}
-        <AnimatePresence mode="wait">
-          {tab === "crystals" && (
-            <motion.div
-              key="crystals"
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-2 gap-4"
-            >
-              {WORLDS.map((world, i) => {
-                const earned = state.worldProgress[world.id]?.crystalEarned;
-                const theme = CRYSTAL_COLORS[i];
-                const isHovered = hoveredCrystal === world.id;
-
-                return (
-                  <motion.div
-                    key={world.id}
-                    className="relative aspect-square rounded-3xl overflow-hidden cursor-pointer"
-                    style={{
-                      background: earned
-                        ? "rgba(255,255,255,0.08)"
-                        : "rgba(255,255,255,0.03)",
-                      border: earned
-                        ? `1.5px solid rgba(255,255,255,0.2)`
-                        : "1.5px solid rgba(255,255,255,0.06)",
-                      boxShadow: earned && isHovered ? `0 0 40px ${theme.glow}` : "none",
-                    }}
-                    whileHover={earned ? { scale: 1.04 } : {}}
-                    onHoverStart={() => setHoveredCrystal(world.id)}
-                    onHoverEnd={() => setHoveredCrystal(null)}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.1, type: "spring" }}
-                  >
-                    {/* Glow background for earned */}
-                    {earned && (
-                      <motion.div
-                        className={cn("absolute inset-0 opacity-20 bg-gradient-to-br", theme.from, theme.to)}
-                        animate={{ opacity: [0.1, 0.25, 0.1] }}
-                        transition={{ duration: 2.5, repeat: Infinity }}
-                      />
-                    )}
-
-                    {/* Sparkle dots */}
-                    {earned && [0, 1, 2].map(j => (
-                      <motion.div key={j} className="absolute w-1 h-1 rounded-full"
-                        style={{ background: theme.sparkle, left: `${20 + j * 30}%`, top: `${15 + j * 20}%` }}
-                        animate={{ opacity: [0, 1, 0], scale: [0.5, 2, 0.5] }}
-                        transition={{ duration: 2, delay: j * 0.7, repeat: Infinity }}
-                      />
-                    ))}
-
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                      <motion.div
-                        className={cn("text-5xl mb-3", earned ? "" : "grayscale opacity-30")}
-                        animate={earned ? { y: [0, -5, 0], rotate: [0, 3, -3, 0] } : {}}
-                        transition={{ duration: 3, repeat: Infinity }}
-                      >
-                        {world.icon}
-                      </motion.div>
-
-                      {earned ? (
-                        <>
-                          <div className="text-3xl mb-1">💎</div>
-                          <h3 className="font-black text-white text-xs text-center">{world.name}</h3>
-                          <motion.span
-                            className={cn("text-[10px] font-black mt-1 px-2 py-0.5 rounded-full text-white bg-gradient-to-r", theme.from, theme.to)}
-                            animate={{ scale: [1, 1.05, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                          >
-                            RESTORED ✨
-                          </motion.span>
-                        </>
-                      ) : (
-                        <>
-                          <h3 className="font-black text-white/20 text-xs text-center">{world.name}</h3>
-                          <span className="text-[10px] text-white/20 font-bold mt-1">🔒 Locked</span>
-                        </>
-                      )}
+        {/* Crystal Memories */}
+        <div className="px-label mb-3" style={{ fontSize:8, color:"var(--px-green2)", letterSpacing:2 }}>◆ CRYSTAL MEMORIES</div>
+        <div className="flex flex-col gap-3 mb-8">
+          {WORLDS.map((world, i) => {
+            const earned = state.worldProgress[world.id]?.crystalEarned;
+            return (
+              <motion.div key={world.id}
+                className={earned ? "px-box" : "px-box-dim"}
+                style={{ padding:"12px 14px", opacity: earned ? 1 : 0.5 }}
+                initial={{ opacity:0, x:-20 }} animate={{ opacity: earned?1:0.5, x:0 }} transition={{ delay:i*0.08 }}>
+                <div className="flex items-center gap-4">
+                  <div style={{ fontSize:28, flexShrink:0 }}>{world.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div style={{ fontFamily:"'Press Start 2P'", fontSize:8, color: earned?"var(--px-white)":"var(--px-green3)", lineHeight:1.6 }}>
+                      {world.name}
                     </div>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          )}
+                    <div className="px-label mt-1" style={{ fontSize:6, color:"var(--px-gray)" }}>{world.theme}</div>
+                  </div>
+                  <div style={{ fontFamily:"'Press Start 2P'", fontSize:16, flexShrink:0,
+                    color: earned?"var(--px-green)":"var(--px-bg3)",
+                    textShadow: earned?"0 0 15px var(--px-glow)":"none" }}>
+                    {earned ? "◆" : "◇"}
+                  </div>
+                </div>
+                {earned && (
+                  <div style={{ marginTop:6, fontFamily:"'VT323'", fontSize:18, color:"var(--px-green2)" }}>
+                    ✓ Memory Restored — {world.crystalName ?? "Crystal"}
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
 
-          {tab === "badges" && (
-            <motion.div
-              key="badges"
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-3 gap-4"
-            >
-              {BADGES.map((badge, i) => {
-                const earned = state.badges.includes(badge.id);
-                const Icon = badge.icon;
-                return (
-                  <motion.div
-                    key={badge.id}
-                    className="flex flex-col items-center"
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.08, type: "spring" }}
-                  >
-                    <motion.div
-                      className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mb-2 relative overflow-hidden",
-                        earned ? `bg-gradient-to-br ${badge.bg}` : "bg-white/5"
-                      )}
-                      style={earned ? { boxShadow: `0 0 25px ${badge.glow}, 0 4px 15px rgba(0,0,0,0.3)` } : {}}
-                      whileHover={earned ? { scale: 1.1, rotate: 5 } : {}}
-                      animate={earned ? {} : {}}
-                    >
-                      {earned && (
-                        <motion.div
-                          className="absolute inset-0"
-                          style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.2), transparent)" }}
-                          animate={{ opacity: [0.3, 0.6, 0.3] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        />
-                      )}
-                      <Icon size={32} className={earned ? "text-white drop-shadow-sm" : "text-white/15"} />
-                      {earned && (
-                        <motion.div
-                          className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center text-[10px]"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", bounce: 0.6 }}
-                        >
-                          ✓
-                        </motion.div>
-                      )}
-                    </motion.div>
-                    <span className={cn("text-[10px] text-center font-black", earned ? "text-white/80" : "text-white/20")}>
-                      {badge.name}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* All complete */}
+        {crystals === WORLDS.length && (
+          <motion.div className="px-box-glow p-6 text-center mb-4"
+            animate={{ boxShadow:["0 0 10px var(--px-glow), 4px 4px 0 var(--px-dark)","0 0 40px rgba(0,255,65,0.6), 4px 4px 0 var(--px-dark)","0 0 10px var(--px-glow), 4px 4px 0 var(--px-dark)"] }}
+            transition={{ duration:2, repeat:Infinity }}>
+            <div style={{ fontSize:40, marginBottom:8 }}>★</div>
+            <div style={{ fontFamily:"'Press Start 2P'", fontSize:11, color:"var(--px-white)", lineHeight:2 }}>
+              PIXORA CHAMPION!
+            </div>
+            <div className="px-body mt-2" style={{ color:"var(--px-green)", fontSize:20 }}>
+              All crystals restored. The AI world is safe!
+            </div>
+          </motion.div>
+        )}
       </div>
       <BottomNav />
     </div>
