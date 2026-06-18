@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -60,7 +60,7 @@
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
-  --font-heading: 'Baloo 2', sans-serif;
+  --font-heading: 'Fredoka One', cursive;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -411,4 +411,26 @@
   45% { transform: scale(0.98) translateX(-5px); }
   60% { transform: scale(0.98) translateX(5px); }
   100% { transform: scale(1) translateX(0); box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+}
+
+/* ===================== MODAL ===================== */
+.pixora-modal-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(5, 4, 20, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+@keyframes modal-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.pixora-modal-sheet {
+  width: 100%; max-width: 480px;
+  border-radius: 28px 28px 0 0;
+  padding: 28px 24px 40px;
+  animation: modal-slide-up 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+  background: linear-gradient(160deg, #1a1040 0%, #0d1f4a 60%, #071a2e 100%);
+  border-top: 1.5px solid rgba(255,255,255,0.15);
+  box-shadow: 0 -20px 60px rgba(0,0,0,0.6);
 }
