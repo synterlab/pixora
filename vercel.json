@@ -1,6 +1,0 @@
-{
-  "buildCommand": "pnpm install && pnpm --filter @workspace/pixora run build",
-  "outputDirectory": "artifacts/pixora/dist/public",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "framework": null
-}
