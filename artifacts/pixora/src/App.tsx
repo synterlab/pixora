@@ -11,6 +11,7 @@ import Collection from "@/pages/Collection";
 import PixoScreen from "@/pages/PixoScreen";
 import ParentSummary from "@/pages/ParentSummary";
 import { GameProvider } from "@/store/gameStore";
+import { AuthProvider } from "@/store/authStore";
 
 const queryClient = new QueryClient();
 
