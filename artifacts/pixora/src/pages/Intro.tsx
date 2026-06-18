@@ -28,6 +28,7 @@ export default function Intro() {
   const [, setLocation] = useLocation();
   const { state, completeIntro } = useGame();
   const [step, setStep] = useState(0);
+  const [modal, setModal] = useState<null | 'howToPlay' | 'about' | 'credits'>(null);
 
   useEffect(() => {
     if (state.introSeen) {
@@ -324,10 +325,129 @@ export default function Intro() {
               <motion.p className="mt-4 text-white/40 text-xs font-bold" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
                 Tap to begin your quest
               </motion.p>
+
+              {/* Secondary action buttons */}
+              <motion.div
+                className="flex items-center gap-2 mt-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 }}
+              >
+                {[
+                  { label: "🕹️ How to Play", key: "howToPlay" },
+                  { label: "✦ About",       key: "about" },
+                  { label: "🏅 Credits",     key: "credits" },
+                ].map(btn => (
+                  <motion.button
+                    key={btn.key}
+                    onClick={() => setModal(btn.key as typeof modal)}
+                    className="flex-1 py-2 px-2 rounded-2xl text-[11px] font-black text-white/70 tracking-wide"
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      backdropFilter: "blur(8px)",
+                    }}
+                    whileHover={{ scale: 1.06, background: "rgba(255,255,255,0.13)" }}
+                    whileTap={{ scale: 0.94 }}
+                  >
+                    {btn.label}
+                  </motion.button>
+                ))}
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
     </div>
+
+      {/* Modal Overlay */}
+      {modal && (
+        <div className="pixora-modal-overlay" onClick={() => setModal(null)}>
+          <div className="pixora-modal-sheet" onClick={e => e.stopPropagation()}>
+            {/* Handle bar */}
+            <div className="mx-auto w-10 h-1 rounded-full bg-white/20 mb-6" />
+
+            {modal === 'howToPlay' && (
+              <>
+                <h2 className="text-2xl font-heading font-bold text-white mb-6 text-center">🕹️ How to Play</h2>
+                <div className="flex flex-col gap-4">
+                  {[
+                    { icon: "🗺️", title: "Explore Worlds", desc: "Unlock adventure worlds on the Map and start your journey!" },
+                    { icon: "🧠", title: "Answer Questions", desc: "Pick the right answer to AI questions and earn XP." },
+                    { icon: "⚡", title: "Earn XP & Crystals", desc: "Correct answers give +10 XP. Complete a world to win a Crystal Memory!" },
+                    { icon: "🤖", title: "Ask Pixo for Hints", desc: "Visit the Pixo screen if you're stuck — Pixo is always happy to help!" },
+                    { icon: "🏆", title: "Become Champion", desc: "Restore all 4 Crystal Memories to become a PIXORA Champion!" },
+                  ].map((step, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      <span className="text-2xl flex-shrink-0">{step.icon}</span>
+                      <div>
+                        <p className="text-white font-black text-sm">{step.title}</p>
+                        <p className="text-white/55 text-xs mt-0.5 leading-relaxed">{step.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {modal === 'about' && (
+              <>
+                <h2 className="text-2xl font-heading font-bold text-white mb-2 text-center">✦ About PIXORA</h2>
+                <p className="text-amber-300 text-xs font-bold text-center mb-6 tracking-widest">Adventures in the Age of AI</p>
+                <div className="space-y-4 text-white/70 text-sm leading-relaxed">
+                  <p>
+                    <span className="text-white font-black">PIXORA</span> is a mobile-first educational adventure game designed for kids aged <span className="text-cyan-300 font-bold">8–13 years old</span>.
+                  </p>
+                  <p>
+                    Through fun quests and crystal-collecting missions, players explore the world of <span className="text-violet-300 font-bold">Artificial Intelligence</span> — learning how AI works, thinks, and affects everyday life.
+                  </p>
+                  <div className="p-4 rounded-2xl text-center" style={{ background: "rgba(255,122,89,0.1)", border: "1px solid rgba(255,122,89,0.2)" }}>
+                    <p className="text-white/50 text-xs mb-1">Built with ❤️ by</p>
+                    <p className="text-white font-black text-lg">Synterlab</p>
+                    <p className="text-white/40 text-xs mt-1">playpixora.fun</p>
+                  </div>
+                  <p className="text-center text-white/40 text-xs">
+                    PIXORA is free to play and always will be. No ads, no purchases — just learning and adventure! 🚀
+                  </p>
+                </div>
+              </>
+            )}
+
+            {modal === 'credits' && (
+              <>
+                <h2 className="text-2xl font-heading font-bold text-white mb-6 text-center">🏅 Credits</h2>
+                <div className="space-y-3">
+                  {[
+                    { role: "🎮 Game Design",    name: "Synterlab Team" },
+                    { role: "🎨 Art & UI",       name: "Synterlab Design" },
+                    { role: "🤖 AI Content",     name: "Synterlab AI Lab" },
+                    { role: "💻 Engineering",    name: "Built on Replit" },
+                    { role: "🌟 Mascot",         name: "Pixo the AI Guide" },
+                    { role: "🌐 Hosted at",      name: "playpixora.fun" },
+                  ].map((c, i) => (
+                    <div key={i} className="flex items-center justify-between px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                      <span className="text-white/50 text-xs font-bold">{c.role}</span>
+                      <span className="text-white text-sm font-black">{c.name}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-center text-white/30 text-xs mt-6">
+                  Made with 💫 for the next generation of AI thinkers.
+                </p>
+              </>
+            )}
+
+            <motion.button
+              onClick={() => setModal(null)}
+              className="w-full mt-6 py-4 rounded-2xl font-black text-white/80 text-sm"
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Close
+            </motion.button>
+          </div>
+        </div>
+      )}
   );
 }
