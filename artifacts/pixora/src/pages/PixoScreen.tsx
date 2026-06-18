@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Settings, Volume2, VolumeX, Trash2, ShieldCheck, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { BottomNav } from "@/components/BottomNav";
 import { Pixo } from "@/components/Pixo";
 import { useGame } from "@/store/gameStore";
+import { useAuth } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -14,7 +15,9 @@ const STAR_DATA = Array.from({ length: 20 }, (_, i) => ({
 }));
 
 export default function PixoScreen() {
+  const [, setLocation] = useLocation();
   const { state, toggleSound, resetProgress } = useGame();
+  const { user, openLoginModal, logout } = useAuth();
 
   const accuracy = state.totalQuestionsAnswered > 0
     ? Math.round((state.totalCorrectAnswers / state.totalQuestionsAnswered) * 100)
@@ -55,8 +58,15 @@ export default function PixoScreen() {
 
       <div className="max-w-md mx-auto px-4 pt-10 relative z-10">
 
-        {/* Settings button */}
-        <div className="flex justify-end mb-4">
+        {/* Top bar: back + settings */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => setLocation("/map")}
+            className="flex items-center gap-1.5 text-white/50 hover:text-white/80 font-bold text-sm transition-colors"
+          >
+            <span className="text-lg">←</span>
+            <span>Map</span>
+          </button>
           <Link href="/parent">
             <Button variant="ghost" size="icon"
               className="text-white/40 hover:text-white rounded-2xl"
@@ -138,6 +148,44 @@ export default function PixoScreen() {
               <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider mt-0.5">{stat.label}</span>
             </motion.div>
           ))}
+        </div>
+
+        {/* Login / Account card */}
+        <div
+          className="rounded-3xl overflow-hidden mb-4 cursor-pointer"
+          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}
+          onClick={openLoginModal}
+        >
+          <div className="px-5 py-4 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
+              style={{ background: "rgba(255,122,89,0.15)", border: "1px solid rgba(255,122,89,0.2)" }}>
+              {user ? user.avatar : "👤"}
+            </div>
+            <div className="flex-1 min-w-0">
+              {user ? (
+                <>
+                  <p className="text-white font-black text-sm truncate">{user.name}</p>
+                  <p className="text-white/40 text-xs font-bold">PIXORA Explorer · Tap to manage</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-white font-black text-sm">Log In / Sign Up</p>
+                  <p className="text-white/40 text-xs font-bold">Save your progress & achievements</p>
+                </>
+              )}
+            </div>
+            {user ? (
+              <button
+                className="text-red-400 text-xs font-black px-3 py-1.5 rounded-xl flex-shrink-0"
+                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}
+                onClick={e => { e.stopPropagation(); logout(); }}
+              >
+                Log out
+              </button>
+            ) : (
+              <span className="text-white/30 text-xl">→</span>
+            )}
+          </div>
         </div>
 
         {/* Settings list */}
