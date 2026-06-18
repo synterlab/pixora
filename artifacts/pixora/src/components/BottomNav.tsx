@@ -17,10 +17,10 @@ export function BottomNav() {
     <div
       className="fixed bottom-0 left-0 right-0 z-50 pb-safe"
       style={{
-        background: "rgba(255, 248, 240, 0.95)",
+        background: "rgba(8, 6, 28, 0.93)",
         backdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(255, 122, 89, 0.15)",
-        boxShadow: "0 -8px 32px rgba(0,0,0,0.08)",
+        borderTop: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 -8px 32px rgba(0,0,0,0.4), 0 -1px 0 rgba(255,255,255,0.05)",
       }}
     >
       <div className="max-w-md mx-auto flex items-end justify-around px-2 py-2">
@@ -60,7 +60,7 @@ export function BottomNav() {
                 {/* Icon */}
                 <div className={cn(
                   "relative z-10 flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300",
-                  !isActive && "bg-orange-50"
+                  !isActive && "bg-white/5"
                 )}>
                   <motion.div
                     animate={isActive ? { y: [0, -2, 0] } : {}}
@@ -69,7 +69,7 @@ export function BottomNav() {
                     <Icon
                       size={isActive ? 22 : 20}
                       strokeWidth={isActive ? 2.5 : 2}
-                      className={isActive ? "text-white drop-shadow-sm" : "text-orange-300"}
+                      className={isActive ? "text-white drop-shadow-sm" : "text-white/35"}
                     />
                   </motion.div>
                 </div>
