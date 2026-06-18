@@ -39,7 +39,7 @@ jobs:
         run: pnpm --filter @workspace/pixora run build
         env:
           NODE_ENV: production
-          BASE_PATH: /pixora/
+          BASE_PATH: /
           PORT: '3000'
 
       - uses: actions/configure-pages@v4
