@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, BookOpen, Eye, Award, Zap, Sparkles } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
@@ -28,6 +29,7 @@ const STAR_DATA = Array.from({ length: 25 }, (_, i) => ({
 }));
 
 export default function Collection() {
+  const [, setLocation] = useLocation();
   const { state } = useGame();
   const [tab, setTab] = useState<"crystals" | "badges">("crystals");
   const [hoveredCrystal, setHoveredCrystal] = useState<number | null>(null);
@@ -53,6 +55,18 @@ export default function Collection() {
       </div>
 
       <div className="max-w-md mx-auto px-4 pt-12 relative z-10">
+
+        {/* Back button */}
+        <motion.button
+          onClick={() => setLocation("/map")}
+          className="flex items-center gap-1.5 mb-6 text-white/50 hover:text-white/80 font-bold text-sm transition-colors"
+          whileTap={{ scale: 0.94 }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <span className="text-lg">←</span>
+          <span>Back to Map</span>
+        </motion.button>
 
         {/* Header */}
         <motion.div className="text-center mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
