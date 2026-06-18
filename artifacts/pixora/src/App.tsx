@@ -32,14 +32,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <GameProvider>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </GameProvider>
+      <AuthProvider>
+        <GameProvider>
+          <TooltipProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+            </WouterRouter>
+            <Toaster />
+          </TooltipProvider>
+        </GameProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
