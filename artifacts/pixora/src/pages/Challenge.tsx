@@ -199,6 +199,18 @@ export default function Challenge() {
 
       <div className="relative z-10 max-w-md mx-auto px-4 pt-20 flex flex-col min-h-screen">
 
+        {/* Back button */}
+        <motion.button
+          onClick={() => setLocation("/map")}
+          className="flex items-center gap-1.5 mb-4 text-white/50 hover:text-white/80 font-bold text-sm transition-colors"
+          whileTap={{ scale: 0.94 }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <span className="text-lg">←</span>
+          <span>Back to Map</span>
+        </motion.button>
+
         {/* Mission Header */}
         <motion.div
           className="flex items-center justify-between mb-5 p-4 rounded-3xl overflow-hidden"
